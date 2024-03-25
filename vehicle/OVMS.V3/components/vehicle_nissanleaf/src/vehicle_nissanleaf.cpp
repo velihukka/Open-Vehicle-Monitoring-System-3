@@ -1408,7 +1408,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
         // d[2] is the J1772 maximum available current, 0 if we're not plugged in
         // TODO enum?
         uint8_t current_limit = d[2] / 5;
-        StandardMetrics.ms_v_charge_climit->SetValue(current_limit);
+        //StandardMetrics.ms_v_charge_climit->SetValue(current_limit);
         if (current_limit > 0 && current_limit <= 32)
           {
           //StandardMetrics.ms_v_charge_type->SetValue("type1");
