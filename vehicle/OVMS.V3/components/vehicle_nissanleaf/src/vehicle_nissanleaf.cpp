@@ -403,6 +403,7 @@ void OvmsVehicleNissanLeaf::vehicle_nissanleaf_charger_status(ChargerStatus stat
         {
         StandardMetrics.ms_v_charge_voltage->SetValue(StandardMetrics.ms_v_bat_voltage->AsFloat());
         StandardMetrics.ms_v_charge_current->SetValue(StandardMetrics.ms_v_bat_current->AsFloat());
+        StandardMetrics.ms_v_charge_power->SetValue(StandardMetrics.ms_v_bat_current->AsFloat() * StandardMetrics.ms_v_bat_voltage->AsFloat());
         }
       break;
     case CHARGER_STATUS_V2X:
@@ -422,18 +423,9 @@ void OvmsVehicleNissanLeaf::vehicle_nissanleaf_charger_status(ChargerStatus stat
       break;
     case CHARGER_STATUS_INTERRUPTED:
       // Charging stopped during charge by user
-		StandardMetrics.ms_v_charge_current->SetValue(0);
-      if (m_ZE0_charger)
-        {
-        StandardMetrics.ms_v_charge_voltage->SetValue(0);
-        // TODO set this in ovms v2
-        // TODO the charger probably knows the line voltage, when we find where it's
-        // coded, don't zero it out when we're plugged in but not charging
-        }
-      if (m_AZE0_charger)
-        {
-        StandardMetrics.ms_v_charge_voltage->SetValue(0); //AZE0 doesn't know line voltage
-        }
+		  StandardMetrics.ms_v_charge_current->SetValue(0);
+      StandardMetrics.ms_v_charge_voltage->SetValue(0);
+      StandardMetrics.ms_v_charge_power->SetValue(0);
       StandardMetrics.ms_v_charge_inprogress->SetValue(false);
       //StandardMetrics.ms_v_door_chargeport->SetValue(false);
       StandardMetrics.ms_v_charge_state->SetValue("stopped");
