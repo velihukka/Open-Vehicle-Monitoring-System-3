@@ -399,12 +399,18 @@ void OvmsVehicleNissanLeaf::vehicle_nissanleaf_charger_status(ChargerStatus stat
       //  {
         //StandardMetrics.ms_v_charge_current->SetValue(StandardMetrics.ms_v_bat_current->AsFloat());
       //  }
-      if (m_ZE0_charger)
+      if (m_ZE0_charger && !fast_charge)
         {
-        StandardMetrics.ms_v_charge_voltage->SetValue(StandardMetrics.ms_v_bat_voltage->AsFloat());
-        StandardMetrics.ms_v_charge_current->SetValue(StandardMetrics.ms_v_bat_current->AsFloat());
+        //StandardMetrics.ms_v_charge_voltage->SetValue(StandardMetrics.ms_v_bat_voltage->AsFloat());
         StandardMetrics.ms_v_charge_power->SetValue(StandardMetrics.ms_v_bat_current->AsFloat() * StandardMetrics.ms_v_bat_voltage->AsFloat());
+        StandardMetrics.ms_v_charge_current->SetValue(StandardMetrics.ms_v_charge_power->AsFloat() / StandardMetrics.ms_v_charge_voltage->AsFloat());
         }
+      else if (m_ZE0_charger && fast_charge)
+      {
+        StandardMetrics.ms_v_charge_voltage->SetValue(StandardMetrics.ms_v_bat_voltage->AsFloat());
+        StandardMetrics.ms_v_charge_power->SetValue(StandardMetrics.ms_v_bat_current->AsFloat() * StandardMetrics.ms_v_bat_voltage->AsFloat());
+        StandardMetrics.ms_v_charge_current->SetValue(StandardMetrics.ms_v_bat_current->AsFloat());
+      }
       break;
     case CHARGER_STATUS_V2X:
       if (!StandardMetrics.ms_v_gen_inprogress->AsBool())
