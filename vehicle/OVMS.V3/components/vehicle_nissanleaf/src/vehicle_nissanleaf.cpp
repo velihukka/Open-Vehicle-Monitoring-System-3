@@ -2227,20 +2227,28 @@ void OvmsVehicleNissanLeaf::HandleRange()
 // only work during charging and for obvious reasons remote charging won't
 // work at all.
 //
-// On Generation 2 Cars, a CAN bus message is sent to wake up the VCU. This
-// function sends that message even to Generation 1 cars which doesn't seem to
-// cause any problems.
+// On Generation 2 Cars, a CAN bus message is sent to wake up the VCU.
 //
 OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::CommandWakeup()
   {
-  // Shotgun approach to waking up the vehicle. Send all kinds of wakeup messages
   if (!cfg_enable_write) return Fail; // Disable commands unless canwrite is true
-  ESP_LOGI(TAG, "Sending Wakeup Frame");
-  unsigned char data = 0;
-  m_can1->WriteStandard(0x679, 1, &data); //Wakes up the modules by spoofing VCM startup message
-  m_can1->WriteStandard(0x679, 1, &data); //Tops up the 12V battery if connected to EVSE
-  m_can1->WriteStandard(0x5C0, 8, &data); //Wakes up the VCM (by spoofing empty battery request heating)
-  return Success;
+  if (MyConfig.GetParamValueInt("xnl", "modelyear", DEFAULT_MODEL_YEAR) < 2013)
+  {
+    // Use the configured pin to wake up ZE0 Leaf with EV SYSTEM ACTIVATION REQUEST
+    MyPeripherals->m_max7317->Output((uint8_t)cfg_ev_request_port, 1);
+    ESP_LOGI(TAG, "EV SYSTEM ACTIVATION REQUEST ON");
+    return Success;
+  }
+  else
+  {
+    // Shotgun approach to waking up the vehicle. Send all kinds of wakeup messages
+    ESP_LOGI(TAG, "Sending Wakeup Frame");
+    unsigned char data = 0;
+    m_can1->WriteStandard(0x679, 1, &data); //Wakes up the modules by spoofing VCM startup message
+    m_can1->WriteStandard(0x679, 1, &data); //Tops up the 12V battery if connected to EVSE
+    m_can1->WriteStandard(0x5C0, 8, &data); //Wakes up the VCM (by spoofing empty battery request heating)
+    return Success;
+  }
   }
 
 OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::RemoteCommandHandler(RemoteCommand command)
@@ -2248,12 +2256,6 @@ OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::RemoteCommandHandler(Remot
   if (!cfg_enable_write) return Fail; //disable commands unless canwrite is true
   ESP_LOGI(TAG, "RemoteCommandHandler");
   CommandWakeup();
-  // Use the configured pin to wake up GEN 1 Leaf with EV SYSTEM ACTIVATION REQUEST
-  if (MyConfig.GetParamValueInt("xnl", "modelyear", DEFAULT_MODEL_YEAR) < 2013)
-  {
-    MyPeripherals->m_max7317->Output((uint8_t)cfg_ev_request_port, 1);
-    ESP_LOGI(TAG, "EV SYSTEM ACTIVATION REQUEST ON");
-  }
   // The GEN 2 Nissan TCU module sends the command repeatedly, so we start
   // m_remoteCommandTimer (which calls RemoteCommandTimer()) to do this
   // EV SYSTEM ACTIVATION REQUEST is released in the timer too
