@@ -1273,7 +1273,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
       break;
     case 0x59e:
       {
-      switch(m_battery_type->AsInt(BATTERY_TYPE_2_24kWh))
+      switch(m_battery_type->AsInt())
         {
         case BATTERY_TYPE_1_24kWh:
           //ZE0 battery does not send this message so this case should not be needed. Fall through for safety.
@@ -1336,6 +1336,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
               StandardMetrics.ms_v_bat_soc->SetValue(soc_new_car);
               }
             }
+            type = BATTERY_TYPE_2_24kWh;
             break;
           case  0x01:
             {
@@ -1380,7 +1381,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
           case 11: cd = CHARGE_DURATION_FULL_L0;  break;
           case 17: cd = CHARGE_DURATION_FULL_L0;  type = BATTERY_TYPE_1_24kWh; break;
           case 18: // meaning of mx 18 differs by battery version
-            switch(m_battery_type->AsInt(BATTERY_TYPE_2_24kWh))
+            switch(m_battery_type->AsInt())
               {
               case BATTERY_TYPE_1_24kWh: cd = CHARGE_DURATION_RANGE_L0; break;
               case BATTERY_TYPE_2_24kWh: cd = CHARGE_DURATION_RANGE_L2; break;
@@ -1561,6 +1562,12 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan2(CAN_frame_t* p_frame)
           {
           StandardMetrics.ms_v_bat_soh->SetValue(soh);
           }
+        }
+        if(!m_battery_type->AsInt()) //set max gids and capacity based on soh on ZE0 as message containing max gids does not exist
+        {
+          uint16_t cap_gid = soh * GEN_1_NEW_CAR_GIDS;
+          m_max_gids->SetValue(AsInt(cap_gid));
+          m_battery_energy_capacity->SetValue(cap_gid * GEN_1_WH_PER_GID, WattHours);
         }
       break;
       }
