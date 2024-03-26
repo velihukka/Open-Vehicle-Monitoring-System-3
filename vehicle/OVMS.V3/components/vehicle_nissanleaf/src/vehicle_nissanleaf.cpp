@@ -2244,7 +2244,10 @@ OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::CommandWakeup()
     // Use the configured pin to wake up ZE0 Leaf with EV SYSTEM ACTIVATION REQUEST
     MyPeripherals->m_max7317->Output((uint8_t)cfg_ev_request_port, 1);
     ESP_LOGI(TAG, "EV SYSTEM ACTIVATION REQUEST ON");
+    return Success;
   }
+  else
+  {
     // Shotgun approach to waking up the vehicle. Send all kinds of wakeup messages
     ESP_LOGI(TAG, "Sending Wakeup Frame");
     unsigned char data = 0;
@@ -2252,6 +2255,7 @@ OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::CommandWakeup()
     m_can1->WriteStandard(0x679, 1, &data); //Tops up the 12V battery if connected to EVSE
     m_can1->WriteStandard(0x5C0, 8, &data); //Wakes up the VCM (by spoofing empty battery request heating)
     return Success;
+  }
   }
 
 OvmsVehicle::vehicle_command_t OvmsVehicleNissanLeaf::RemoteCommandHandler(RemoteCommand command)
