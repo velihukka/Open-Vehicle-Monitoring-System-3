@@ -1225,7 +1225,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
     }
       break;
     case 0x54c:
-      /* Ambient temperature.  This one has half-degree C resolution,
+      {/* Ambient temperature.  This one has half-degree C resolution,
        * and seems to stay within a degree or two of the "eyebrow" temp display.
        * App label: AMBIENT
        */
@@ -1238,9 +1238,9 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
 
       m_climate_really_off = (d[5] == 0x00 || d[5] == 0xf8);
 
-      break;
+      break;}
     case 0x54f:
-      /* Climate control's measurement of temperature inside the car.
+      {/* Climate control's measurement of temperature inside the car.
        * Appears to be in Fahrenheit. Unsure why the check for 20? 
        * mjk: seeems like off by 6 celcius on 2013 models, so added cabintempoffset that can be set in GUI.
        */
@@ -1249,7 +1249,7 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
         StandardMetrics.ms_v_env_cabintemp->SetValue((5.0 / 9.0 * (d[0] - 32)) + MyConfig.GetParamValueFloat("xnl", "cabintempoffset", DEFAULT_CABINTEMP_OFFSET));
         // StandardMetrics.ms_v_env_cabintemp->SetValue(d[0] / 2.0 - 14);
         }
-      break;
+      break;}
     case 0x55a:
       {
       /* Motor, charge and inverter temperature guesses in Fahrenheit?
