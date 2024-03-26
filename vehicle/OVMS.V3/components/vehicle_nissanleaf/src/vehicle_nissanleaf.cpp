@@ -1276,9 +1276,11 @@ void OvmsVehicleNissanLeaf::IncomingFrameCan1(CAN_frame_t* p_frame)
       switch(m_battery_type->AsInt(BATTERY_TYPE_2_24kWh))
         {
         case BATTERY_TYPE_1_24kWh:
+          //ZE0 battery does not send this message so this case should not be needed. Fall through for safety.
         case BATTERY_TYPE_2_24kWh:
           {
           uint16_t cap_gid = d[2] << 4 | d[3] >> 4;
+          m_max_gids->SetValue(AsInt(cap_gid));
           m_battery_energy_capacity->SetValue(cap_gid * GEN_1_WH_PER_GID, WattHours);
           }
           break;
